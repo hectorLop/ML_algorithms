@@ -1,6 +1,5 @@
-from abc import abstractmethod
-from typing import Sequence
 from __future__ import annotations
+from typing import Sequence
 
 import numpy as np
 
@@ -46,7 +45,7 @@ class LinearRegression:
         n_features : int
             Number of features
         """
-        self.weights = np.random.rand(n_features, 1)
+        self._weights = np.random.rand(n_features, 1)
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> LinearRegression:
         """
@@ -64,19 +63,24 @@ class LinearRegression:
         LinearRegression
             Self object
         """
-        if X.shape[0] != y.shape[0]:
-            raise ValueError('X and y number of rows must match in dimensions')
+        self._check_matrix_dimensions(X, y)
       
         X = self._add_bias_to_data(X)
         self._initialize_weights(X.shape[1])
 
         # Normal equation if not gradient
-        if not self.gradient:
+        if not self._gradient:
             self._normal_equation(X, y)
         else:
             self._mse_gradient_descent(X, y)
         
         return self
+
+    def _check_matrix_dimensions(self, X: np.ndarray, y: np.ndarray) -> None:
+        if X.shape[0] != y.shape[0]:
+            raise ValueError('X and y number of rows must match in dimensions')
+        elif y.shape[1] != 1:
+            raise ValueError('Target values array must have an unique column')
 
     def _add_bias_to_data(self, X: np.ndarray) -> np.ndarray:
         """
@@ -114,7 +118,8 @@ class LinearRegression:
 
     def _mse_gradient_descent(self, X: np.ndarray, y: np.ndarray) -> None:
         """
-        Computes the gradient for the MSE cost function on the weights parameter
+        Computes the gradient descent for the MSE cost function on the weights
+        parameter
 
         Parameters
         ----------
@@ -125,10 +130,10 @@ class LinearRegression:
         """
         m = X.shape[0]
 
-        for iteration in range(self.n_iterations):
-            error = X.dot(self.weights) - y
+        for iteration in range(self._n_iterations):
+            error = X.dot(self._weights) - y
             gradient = 2/m * X.T.dot(error)
-            self.weights = self.weights - self.learning_rate * gradient
+            self.weights = self._weights - self._learning_rate * gradient
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -147,6 +152,6 @@ class LinearRegression:
         # Add a bias of 1 into the position 0 of X
         X = self._add_bias_to_data(X)
 
-        predictions = X.dot(self.weights)
+        predictions = X.dot(self._weights)
 
         return predictions
