@@ -4,7 +4,10 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-class Regression:
+class Regression(ABC):
+
+    def __init__(self) -> None:
+        self._weights = None
 
     def _initialize_weights(self, n_features: int):
         """
@@ -109,11 +112,77 @@ class LinearRegression(Regression):
         Weights vector
     """
 
-    def __init__(self, gradient: bool=True, learning_rate: float=0.01, n_iterations: int=100):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> LinearRegression:
+        """
+        Find the optimal weights values for a given data
+
+        Parameters
+        ----------
+        X : ndarray
+            Training dataset
+        y : ndarray
+            Training target values dataset
+        
+        Returns
+        -------
+        LinearRegression
+            Self object
+        """
+        self._check_matrix_dimensions(X, y)
+      
+        X = self._add_bias_to_data(X)
+        self._weights = self._initialize_weights(X.shape[1])
+     
+        self._normal_equation(X, y)
+        
+        return self
+
+    def _normal_equation(self, X: np.ndarray, y: np.ndarray) -> None:
+        """
+        Updates the weights vector using the Normal Equation.
+
+        Parameters
+        ----------
+        X : ndarray
+            Training data
+        y : ndarray
+            Training target values
+        """
+        inverse_term = np.linalg.inv(X.T.dot(X))
+        second_term = X.T.dot(y)
+
+        self._weights = inverse_term.dot(second_term)
+
+
+class LinearRegressionGD(Regression):
+    """
+    Implementation of Linear Regression algorithm with both Gradient Descent and
+    Normal equation implementations.
+
+    Parameters
+    ----------
+    learning_rate : float
+        Determines the gradient step size. Default value is 0.01
+    n_iterations : int
+        Number of iterations of the Gradient Descent. Default value is 100.
+
+    Attributes
+    ----------
+    _learning_rate : float
+        Determines the gradient step size
+    _n_iterations : int
+        Number of iterations of the Gradient Descent
+    _weights : array-like
+        Weights vector
+    """
+
+    def __init__(self, learning_rate: float=0.01, n_iterations: int=100):
+        super().__init__()
         self._learning_rate = learning_rate
         self._n_iterations = n_iterations
-        self._gradient = gradient
-        self._weights = None
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> LinearRegression:
         """
@@ -136,29 +205,9 @@ class LinearRegression(Regression):
         X = self._add_bias_to_data(X)
         self._weights = self._initialize_weights(X.shape[1])
 
-        # Normal equation if not gradient
-        if not self._gradient:
-            self._normal_equation(X, y)
-        else:
-            self._mse_gradient_descent(X, y)
+        self._mse_gradient_descent(X, y)
         
         return self
-
-    def _normal_equation(self, X: np.ndarray, y: np.ndarray) -> None:
-        """
-        Updates the weights vector using the Normal Equation.
-
-        Parameters
-        ----------
-        X : ndarray
-            Training data
-        y : ndarray
-            Training target values
-        """
-        inverse_term = np.linalg.inv(X.T.dot(X))
-        second_term = X.T.dot(y)
-
-        self._weights = inverse_term.dot(second_term)
 
     def _mse_gradient_descent(self, X: np.ndarray, y: np.ndarray) -> None:
         """
@@ -174,8 +223,7 @@ class LinearRegression(Regression):
         """
         m = X.shape[0]
 
-        for iteration in range(self._n_iterations):
-            print(self._weights)
+        for epoch in range(self._n_iterations):
             error = X.dot(self._weights) - y
             gradient = 2/m * X.T.dot(error)
             self.weights = self._weights - self._learning_rate * gradient
