@@ -1,14 +1,25 @@
 import pytest
 import numpy as np
 
-from Linear_Regression.regression import LinearRegression
+from Linear_Regression.regression import LinearRegression, LinearRegressionGD
 
-def test_linear_regression_normal_equation():
-    lin_reg = LinearRegression(False)
+@pytest.fixture
+def train_test_data():
+    """
+    Provides the training and test sets
+    """
     X_train = 2 * np.random.rand(100, 1)
     y_train = 4 + 3 * X_train + np.random.randn(100, 1)
-
     X_test = np.array([[0], [2]])
+
+    return X_train, y_train, X_test
+
+def test_linear_regression_normal_equation(train_test_data):
+    """
+    Tests the linear regression algorithm using the Normal Equation
+    """
+    lin_reg = LinearRegression()
+    X_train, y_train, X_test = train_test_data
 
     lin_reg.fit(X_train, y_train)
 
@@ -18,12 +29,12 @@ def test_linear_regression_normal_equation():
     assert y_pred.size > 0
     assert y_pred.shape == (X_test.shape[0], 1)
 
-def test_linear_regression_grad():
-    lin_reg = LinearRegression()
-    X_train = 2 * np.random.rand(100, 1)
-    y_train = 4 + 3 * X_train + np.random.randn(100, 1)
-
-    X_test = np.array([[0], [2]])
+def test_linear_regression_batch_gradient(train_test_data):
+    """
+    Tests the linear regression algorithm using Batch Gradient Descent
+    """
+    lin_reg = LinearRegressionGD()
+    X_train, y_train, X_test = train_test_data
 
     lin_reg.fit(X_train, y_train)
 
@@ -33,22 +44,30 @@ def test_linear_regression_grad():
     assert y_pred.size > 0
     assert y_pred.shape == (X_test.shape[0], 1)
 
-def test_linear_regression_different_dimensions():
+def test_linear_regression_different_dimensions(train_test_data):
+    """
+    Test the exception when both arrays have different dimensions 
+    """
     lin_reg = LinearRegression()
-    X_train = 2 * np.random.rand(105, 1)
-    y_train = 4 + + np.random.randn(100, 1)
+    X_train = 2 * np.random.rand(100, 1)
+    y_train = 4 + 3 + np.random.randn(105, 1)
 
     try:
         lin_reg.fit(X_train, y_train)
+        assert False
     except ValueError as ex:
         assert str(ex) == 'X and y number of rows must match in dimensions'
 
-def test_linear_regression_different_target_columns():
+def test_linear_regression_multiple_target_columns(train_test_data):
+    """
+    Test the exception when both the target data has more than one column.
+    """
     lin_reg = LinearRegression()
     X_train = 2 * np.random.rand(100, 1)
-    y_train = 4 + + np.random.randn(100, 5)
+    y_train = 4 + 3 + np.random.randn(100, 2)
 
     try:
         lin_reg.fit(X_train, y_train)
+        assert False
     except ValueError as ex:
         assert str(ex) == 'Target values array must have an unique column'
