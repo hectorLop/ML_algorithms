@@ -33,7 +33,31 @@ def test_linear_regression_batch_gradient(train_test_data):
     """
     Tests the linear regression algorithm using Batch Gradient Descent
     """
-    lin_reg = LinearRegressionGD()
+    X_train, y_train, X_test = train_test_data
+    lin_reg = LinearRegressionGD(batch_size=X_train.shape[0], n_iterations=10000)
+
+    lin_reg.fit(X_train, y_train)
+
+    y_pred = lin_reg.predict(X_test)
+
+    assert isinstance(y_pred, np.ndarray)
+    assert y_pred.size > 0
+    assert y_pred.shape == (X_test.shape[0], 1)
+
+def test_linear_regression_stochastic_gradient_descent(train_test_data):
+    lin_reg = LinearRegressionGD(n_iterations=1000)
+    X_train, y_train, X_test = train_test_data
+
+    lin_reg.fit(X_train, y_train)
+
+    y_pred = lin_reg.predict(X_test)
+
+    assert isinstance(y_pred, np.ndarray)
+    assert y_pred.size > 0
+    assert y_pred.shape == (X_test.shape[0], 1)
+
+def test_linear_regression_mini_batch_gradient_descent(train_test_data):
+    lin_reg = LinearRegressionGD(batch_size=6, n_iterations=1000)
     X_train, y_train, X_test = train_test_data
 
     lin_reg.fit(X_train, y_train)
