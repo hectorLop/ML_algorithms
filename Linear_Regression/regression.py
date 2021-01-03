@@ -23,7 +23,7 @@ class Regression(ABC):
         ndarray
             Array of weights initialized randomly
         """
-        return np.random.rand(n_features, 1)
+        return np.random.randn(n_features, 1)
 
     def _check_matrix_dimensions(self, X: np.ndarray, y: np.ndarray) -> None:
         """
@@ -168,6 +168,9 @@ class LinearRegressionGD(Regression):
         Determines the gradient step size. Default value is 0.01
     n_iterations : int
         Number of iterations of the Gradient Descent. Default value is 100.
+    batch_size : int
+        Gradient Descent batch size. Default is 1, which means Stochastic Gradient
+        Descent.
 
     Attributes
     ----------
@@ -177,12 +180,15 @@ class LinearRegressionGD(Regression):
         Number of iterations of the Gradient Descent
     _weights : array-like
         Weights vector
+    _batch_size : int
+        Gradient Descent batch size
     """
 
-    def __init__(self, learning_rate: float=0.01, n_iterations: int=100):
+    def __init__(self, learning_rate: float=0.1, n_iterations: int=100, batch_size: int=1):
         super().__init__()
         self._learning_rate = learning_rate
         self._n_iterations = n_iterations
+        self._batch_size = batch_size
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> LinearRegression:
         """
@@ -221,9 +227,11 @@ class LinearRegressionGD(Regression):
         y : ndarray
             Training target values
         """
-        m = X.shape[0]
+        m = self._batch_size
+        batches = m // self._batch_size
 
         for epoch in range(self._n_iterations):
-            error = X.dot(self._weights) - y
-            gradient = 2/m * X.T.dot(error)
-            self.weights = self._weights - self._learning_rate * gradient
+            for iteration in range(0, m, self._batch_size):
+                error = X[iteration:iteration + self._batch_size].dot(self._weights) - y[iteration:iteration + self._batch_size]
+                gradient = 2/m * X[iteration:iteration + self._batch_size].T.dot(error)
+                self.weights = self._weights - self._learning_rate * gradient
