@@ -6,8 +6,13 @@ import numpy as np
 
 class Regression(ABC):
 
-    def __init__(self) -> None:
+    def __init__(self, random_state: int=42) -> None:
         self._weights = None
+        
+        # Random seed for reproducible results
+        if random_state:
+            print(random_state)
+            np.random.seed(random_state)
 
     def _initialize_weights(self, n_features: int):
         """
@@ -21,8 +26,7 @@ class Regression(ABC):
         Returns
         -------
         ndarray
-            Array of weights initialized randomly
-        """
+            Array of weights initialized randomly """
         return np.random.randn(n_features, 1)
 
     def _check_matrix_dimensions(self, X: np.ndarray, y: np.ndarray) -> None:
@@ -112,8 +116,8 @@ class LinearRegression(Regression):
         Weights vector
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, random_state: int=42) -> None:
+        super().__init__(random_state)
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> LinearRegression:
         """
@@ -156,7 +160,6 @@ class LinearRegression(Regression):
 
         self._weights = inverse_term.dot(second_term)
 
-
 class LinearRegressionGD(Regression):
     """
     Implementation of Linear Regression algorithm with both Gradient Descent and
@@ -184,8 +187,8 @@ class LinearRegressionGD(Regression):
         Gradient Descent batch size
     """
 
-    def __init__(self, learning_rate: float=0.1, n_iterations: int=100, batch_size: int=1):
-        super().__init__()
+    def __init__(self, learning_rate: float=0.1, n_iterations: int=100, batch_size: int=1,  random_state: int=42):
+        super().__init__(random_state)
         self._learning_rate = learning_rate
         self._n_iterations = n_iterations
         self._batch_size = batch_size
@@ -232,6 +235,9 @@ class LinearRegressionGD(Regression):
 
         for epoch in range(self._n_iterations):
             for iteration in range(0, m, self._batch_size):
+                # Computing gradients
                 error = X[iteration:iteration + self._batch_size].dot(self._weights) - y[iteration:iteration + self._batch_size]
                 gradient = 2/m * X[iteration:iteration + self._batch_size].T.dot(error)
-                self.weights = self._weights - self._learning_rate * gradient
+
+                # Updating weights
+                self._weights = self._weights - self._learning_rate * gradient
