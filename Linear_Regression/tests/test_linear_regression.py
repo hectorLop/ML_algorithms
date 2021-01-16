@@ -14,6 +14,7 @@ def train_test_data():
 
     return X_train, y_train, X_test
 
+
 def test_linear_regression_normal_equation(train_test_data):
     """
     Tests the linear regression algorithm using the Normal Equation
@@ -28,6 +29,7 @@ def test_linear_regression_normal_equation(train_test_data):
     assert isinstance(y_pred, np.ndarray)
     assert y_pred.size > 0
     assert y_pred.shape == (X_test.shape[0], 1)
+    assert y_pred[0] < y_pred[1]
 
 def test_linear_regression_batch_gradient(train_test_data):
     """
@@ -43,6 +45,7 @@ def test_linear_regression_batch_gradient(train_test_data):
     assert isinstance(y_pred, np.ndarray)
     assert y_pred.size > 0
     assert y_pred.shape == (X_test.shape[0], 1)
+    assert y_pred[0] < y_pred[1]
 
 def test_linear_regression_stochastic_gradient_descent(train_test_data):
     lin_reg = LinearRegressionGD(n_iterations=1000)
@@ -52,21 +55,27 @@ def test_linear_regression_stochastic_gradient_descent(train_test_data):
 
     y_pred = lin_reg.predict(X_test)
 
+    y_pred = lin_reg.predict(X_test)
+
     assert isinstance(y_pred, np.ndarray)
     assert y_pred.size > 0
     assert y_pred.shape == (X_test.shape[0], 1)
+    assert y_pred[0] < y_pred[1]
 
 def test_linear_regression_mini_batch_gradient_descent(train_test_data):
-    lin_reg = LinearRegressionGD(batch_size=6, n_iterations=1000)
+    lin_reg = LinearRegressionGD(batch_size=6, n_iterations=5000)
     X_train, y_train, X_test = train_test_data
 
     lin_reg.fit(X_train, y_train)
 
     y_pred = lin_reg.predict(X_test)
 
+    y_pred = lin_reg.predict(X_test)
+
     assert isinstance(y_pred, np.ndarray)
     assert y_pred.size > 0
     assert y_pred.shape == (X_test.shape[0], 1)
+    assert y_pred[0] < y_pred[1]
 
 def test_linear_regression_different_dimensions(train_test_data):
     """
