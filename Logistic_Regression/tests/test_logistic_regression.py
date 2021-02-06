@@ -20,14 +20,13 @@ def test_logistic_regression(train_test_data):
     """
     Tests the linear regression algorithm using the Normal Equation
     """
-    log_reg = LogisticRegression(n_iterations=5000)
     X_train, y_train = train_test_data
     X_test = np.array([[1.7], [1.5]])
+
+    log_reg = LogisticRegression(n_iterations=5000, batch_size=32)
     log_reg.fit(X_train, y_train)
 
     y_pred = log_reg.predict(X_test)
-    print(y_pred)
-    print(log_reg._loss[:10])
 
     assert isinstance(y_pred, np.ndarray)
     assert y_pred.size > 0

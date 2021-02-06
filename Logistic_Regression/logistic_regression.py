@@ -2,10 +2,11 @@ import numpy as np
 
 class LogisticRegression():
 
-    def __init__(self, learning_rate: float=0.1, n_iterations: int=100):
+    def __init__(self, learning_rate: float=0.1, n_iterations: int=100, batch_size=1):
         self._weights = None
         self._learning_rate = learning_rate
         self._n_iterations = n_iterations
+        self._batch_size = batch_size
         self._loss = []
         self._threshold = 0.5
 
@@ -49,18 +50,24 @@ class LogisticRegression():
         self._gradient_descent(X, y)
 
     def _gradient_descent(self, X, y):
-        m = len(X)
         y = y.reshape(-1, 1)
+        n_batches = X.shape[0] // self._batch_size
+        # Splitting the data into batches
+        X_batches = np.array_split(X, n_batches)
+        y_batches = np.array_split(y, n_batches)
 
-        for iteration in range(self._n_iterations):
-            y_pred = self._sigmoid(X.dot(self._weights))
+        for epoch in range(self._n_iterations):
+            for idx, batch in enumerate(X_batches):
+                m = len(batch)
+                y_pred = self._sigmoid(batch.dot(self._weights))
+            
+                # Keep track of the loss for each epoch
+                loss = (-1 / m) * np.sum((y_batches[idx] * np.log(y_pred)) + ((1 - y_batches[idx]) * np.log(1 - y_pred)))
+                self._loss.append(loss)
 
-            loss = (-1 / m) * np.sum((y * np.log(y_pred)) + ((1 - y) * np.log(1 - y_pred)))
-            self._loss.append(loss)
+                gradients = (1 / m) * batch.T.dot(y_pred - y_batches[idx])
 
-            gradients = (1 / m) * X.T.dot(y_pred - y)
-
-            self._weights -= self._learning_rate * gradients
+                self._weights -= self._learning_rate * gradients
     
     def _sigmoid(self, z):
         return 1 / (1 + np.exp(-z))
