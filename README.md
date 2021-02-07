@@ -1,5 +1,5 @@
 # ML_algorithms
-![ML_algorithms_logo](/home/hectorlopez/Datos/Proyectos/Algoritmos_ML/ML_algorithms/images/ML_algorithms_logo.png)
+![ML_algorithms_logo](images/ML_algorithms_logo.png)
 
 ## Machine Learning Algorithms from scratch
 
