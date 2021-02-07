@@ -12,7 +12,21 @@ def train_test_data():
     iris = datasets.load_iris()
 
     X = iris['data'][:, 3:]
-    y = (iris['target'] == 2).astype(np.int)
+
+    y = (iris['target'] == 2).astype(np.int8)
+    y = y.reshape(-1, 1)
+
+    return X, y
+
+@pytest.fixture
+def train_test_data_softmax():
+    """
+    Provides the training and test sets
+    """
+    iris = datasets.load_iris()
+
+    X = iris['data'][:, 2:]
+    y = iris['target']
 
     return X, y
 
@@ -33,3 +47,14 @@ def test_logistic_regression(train_test_data):
     assert y_pred.shape == (X_test.shape[0], 1)
     assert y_pred[0] == 1 
     assert y_pred[1] == 0
+
+def test_logistic_regression_softmax(train_test_data_softmax):
+    X_train, y_train = train_test_data_softmax
+    X_test = np.array([[5, 2]])
+
+    log_reg = LogisticRegression(n_iterations=5000, batch_size=32, softmax=True)
+    log_reg.fit(X_train, y_train)
+
+    y_pred = log_reg.predict(X_test)
+    
+    assert y_pred[0] == 2
