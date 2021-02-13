@@ -42,8 +42,8 @@ class Regression(ABC):
         """
         if X.shape[0] != y.shape[0]:
             raise ValueError('X and y number of rows must match in dimensions')
-        elif y.shape[1] != 1:
-            raise ValueError('Target values array must have an unique column')
+        elif len(y.shape) > 2 or (len(y.shape) == 2 and y.shape[1] != 1):
+            raise ValueError(f'Target values array must have an unique column: {y.shape}')
 
     def _add_bias_to_data(self, X: np.ndarray) -> np.ndarray:
         """
